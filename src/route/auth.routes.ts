@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { register, login } from "../modules/auth/controller/auth.controller";
+import { register, login, resetPassword } from "../modules/auth/controller/auth.controller";
 import { validate } from "../middlewares/validate.middleware";
-import { registerSchema, loginSchema } from "../validations/auth.validation";
+import { registerSchema, loginSchema, resetPasswordSchema } from "../validations/auth.validation";
 
 const router = Router();
 
@@ -70,5 +70,42 @@ router.post("/register", validate(registerSchema), register);
  *         description: Validation failed
  */
 router.post("/login", validate(loginSchema), login);
+
+/**
+ * @swagger
+ * /api/auth/reset-password:
+ *   post:
+ *     summary: Reset password
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - new_password
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: john@example.com
+ *               token:
+ *                 type: string
+ *                 example: your-reset-token
+ *                 nullable: true
+ *                 description: Optional reset token
+ *               new_password:
+ *                 type: string
+ *                 example: sample@123
+ *     responses:
+ *       200:
+ *         description: Password reset successful
+ *       400:
+ *         description: Invalid token or email
+ *       422:
+ *         description: Validation failed
+ */
+router.post("/reset-password", validate(resetPasswordSchema), resetPassword);
 
 export default router;

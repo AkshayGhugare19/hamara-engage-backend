@@ -47,3 +47,17 @@ export const loginSchema = Joi.object({
     "any.required": "Password is required",
   }),
 });
+
+export const resetPasswordSchema = Joi.object({
+  email: Joi.string().email().lowercase().required().messages({
+    "string.email": "Please enter a valid email",
+    "string.empty": "Email is required",
+    "any.required": "Email is required",
+  }),
+  token: Joi.string().optional().allow(null, ""),
+  new_password: Joi.string().min(6).max(100).required().messages({
+    "string.empty": "New password is required",
+    "string.min": "New password must be at least 6 characters",
+    "any.required": "New password is required",
+  }),
+});

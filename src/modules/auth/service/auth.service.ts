@@ -76,3 +76,17 @@ export const loginService = async (
 
   return { token };
 };
+
+export const resetPasswordService = async (email: string, token: string, new_password: string) => {
+  const user = await UserRepository.findOne({ email });
+  if (!user) {
+    throw new AppError("User not found", 404);
+  }
+  const hash = await bcrypt.hash(new_password, 12);
+  await user.update({ password: hash });
+  return { email };
+};
+
+export const logoutService = async (userId: string) => {
+  await UserRepository.updateAccessTokens(userId, { access_token: null, refresh_token: null });
+};
