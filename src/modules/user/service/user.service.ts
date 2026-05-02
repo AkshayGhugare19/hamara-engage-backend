@@ -2,6 +2,7 @@ import UserRepository from "../model/user.repository";
 import bcrypt from "bcryptjs";
 
 import { AppError } from "../../../utils/AppError";
+import { sendMail } from "../../../utils/mailService";
 export const addUserService = async (
   first_name: string,
   last_name: string,
@@ -35,7 +36,20 @@ export const addUserService = async (
     role,
     status,
   });
-
+    if (user) {
+      await sendMail({
+        to: email,
+        subject: "Welcome to Our App",
+        template: "welcome", 
+        data: { 
+          first_name, 
+          email, 
+          password: passwordHash,
+          login_link: "http://localhost:5173/login", 
+          reset_password_link: `http://localhost:5173/reset-password?email=${email}` 
+        }, 
+      });
+    }
   return user;
 }
 
