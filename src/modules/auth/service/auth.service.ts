@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 
 import UserRepository from "../../user/model/user.repository";
 import { AppError } from "../../../utils/AppError";
+import { generateAccessToken } from "../../../utils/generateAccessToken";
 
 export const registerService = async (
   first_name: string,
@@ -36,7 +37,7 @@ export const registerService = async (
   });
 
   // Return user without password
-  const userJson = user.toJSON() as Record<string, unknown>;
+  const userJson = user?.toJSON() as Record<string, unknown>;
   delete userJson.password;
   return userJson;
 };
@@ -52,26 +53,26 @@ export const loginService = async (
     throw new AppError("Invalid email or password", 401);
   }
 
-  if (user.status === "INACTIVE") {
+  if (user?.status === "INACTIVE") {
     throw new AppError("Account is inactive. Please contact support.", 403);
   }
 
-  const userJson = user.toJSON() as Record<string, unknown>;
+  const userJson = user?.toJSON() as Record<string, unknown>;
   const match = await bcrypt.compare(password, userJson.password as string);
 
   if (!match) {
     throw new AppError("Invalid email or password", 401);
   }
 
-  const token = jwt.sign(
-    {
-      id: user.id,
-      role: user.role,
-      email: user.email,
-    },
-    process.env.JWT_ACCESS_SECRET as string,
-    { expiresIn: "1d" }
-  );
+  const token = generateAccessToken({
+    id: user?.id,
+    role: user?.role,
+    email: user?.email,
+  });
+
+  if (token) {
+    await UserRepository.updateAccessTokens(user?.id, { access_token: token });
+  }
 
   return { token };
 };

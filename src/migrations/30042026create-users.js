@@ -55,6 +55,14 @@ module.exports = {
         allowNull: false,
         defaultValue: "ACTIVE",
       },
+      access_token: {
+        type: Sequelize.TEXT,
+        allowNull: true,
+      },
+      refresh_token: {
+        type: Sequelize.TEXT,
+        allowNull: true,
+      },
       created_at: {
         allowNull: false,
         type: Sequelize.DATE,

@@ -19,6 +19,8 @@ export class User extends Model<
   declare mobile: string;
   declare password: string;
   declare role: CreationOptional<"USER" | "ADMIN">;
+  declare access_token: CreationOptional<string | null>;
+  declare refresh_token: CreationOptional<string | null>;
   declare status: CreationOptional<"ACTIVE" | "INACTIVE">;
   declare readonly created_at: CreationOptional<Date>;
   declare readonly updated_at: CreationOptional<Date>;
@@ -67,6 +69,14 @@ User.init(
       type: DataTypes.ENUM("ACTIVE", "INACTIVE"),
       defaultValue: "ACTIVE",
     },
+    access_token: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    refresh_token: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
     created_at: DataTypes.DATE,
     updated_at: DataTypes.DATE,
   },
@@ -75,15 +85,13 @@ User.init(
     tableName: "users",
     modelName: "User",
     timestamps: true,
-    created_at: "created_at",
-    updated_at: "updated_at",
-    // Never return password in JSON responses
+    createdAt: "created_at",
+    updatedAt: "updated_at",
     defaultScope: {
       attributes: { exclude: ["password"] },
     },
     scopes: {
-      //@ts-ignore
-      withPassword: { attributes: {} },
+      withPassword: { attributes: { exclude: [] } },
     },
   }
 );
