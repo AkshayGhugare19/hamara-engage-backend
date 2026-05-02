@@ -1,0 +1,44 @@
+import express from "express";
+import cors from "cors";
+import helmet from "helmet";
+import morgan from "morgan";
+import dotenv from "dotenv";
+import swaggerUi from "swagger-ui-express";
+
+import authRoutes from "./route/auth.routes";
+import userRoutes from "./route/user.routes";
+import { errorHandler } from "./middlewares/error.middleware";
+import { swaggerSpec } from "./config/swagger";
+
+dotenv.config();
+
+const app = express();
+
+// ─── Security & Utils ──────────────────────────────────────────────
+app.use(helmet());
+app.use(cors());
+app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// ─── Health Check ──────────────────────────────────────────────────
+app.get("/api/health", (_req, res) => {
+  res.json({ success: true, message: "Server is running" });
+});
+
+// ─── Swagger Docs ──────────────────────────────────────────────────
+app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+// ─── Routes ────────────────────────────────────────────────────────
+app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
+
+// ─── 404 ───────────────────────────────────────────────────────────
+app.use((_req, res) => {
+  res.status(404).json({ success: false, message: "Route not found" });
+});
+
+// ─── Global Error Handler ──────────────────────────────────────────
+app.use(errorHandler);
+
+export default app;
