@@ -4,12 +4,13 @@ import helmet from "helmet";
 import morgan from "morgan";
 import dotenv from "dotenv";
 import swaggerUi from "swagger-ui-express";
-
 import authRoutes from "./route/auth.routes";
 import userRoutes from "./route/user.routes";
+import userLogRoutes from "./route/user-log.routes";
 import roleRoutes from "./route/role.routes";
 import { errorHandler } from "./middlewares/error.middleware";
 import { swaggerSpec } from "./config/swagger";
+import { initAssociations } from "./config/associations";
 
 dotenv.config();
 
@@ -22,6 +23,8 @@ app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+initAssociations();
+
 // ─── Health Check ──────────────────────────────────────────────────
 app.get("/api/health", (_req, res) => {
   res.json({ success: true, message: "Server is running" });
@@ -33,6 +36,7 @@ app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 // ─── Routes ────────────────────────────────────────────────────────
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/user-log", userLogRoutes);
 app.use("/api/roles", roleRoutes);
 
 // ─── 404 ───────────────────────────────────────────────────────────

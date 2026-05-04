@@ -6,6 +6,7 @@ import {
   CreationOptional,
 } from "sequelize";
 import sequelize from "../../../config/db";
+import UserLog from "../../user-log/model/user-log.model";
 
 export class User extends Model<
   InferAttributes<User>,
@@ -95,5 +96,6 @@ User.init(
     },
   }
 );
+
 
 export default User;

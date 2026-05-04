@@ -55,8 +55,8 @@ router.post("/register", validate(registerSchema), register);
  *       content:
  *         application/json:
  *           example:
- *             email: john@example.com
- *             password: secret123
+ *             email: admin@test.com
+ *             password: test@123
  *     responses:
  *       200:
  *         description: Login successful
