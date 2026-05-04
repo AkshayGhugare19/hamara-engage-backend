@@ -1,19 +1,37 @@
 import { Request, Response, NextFunction } from "express";
-import { errorResponse } from "../utils/responseHandler";
 
 export const errorHandler = (
-  err: Error & { statusCode?: number },
-  _req: Request,
+  err: any,
+  req: Request,
   res: Response,
-  _next: NextFunction
-): void => {
-  const statusCode = err.statusCode || 500;
-  const message = err.message || "Internal Server Error";
+  next: NextFunction
+) => {
+  console.error("ERROR:", err);
 
-  // Log stack only in development
-  if (process.env.NODE_ENV === "development") {
-    console.error(err.stack);
+  // Custom error (you throw manually)
+  if (err.statusCode) {
+    return res.status(err.statusCode).json({
+      success: false,
+      message: err.message,
+      errors: err.errors || null,
+    });
   }
 
-  errorResponse(res, statusCode, message);
+  // Sequelize / DB error example (optional)
+  if (err.name === "SequelizeUniqueConstraintError") {
+    return res.status(400).json({
+      success: false,
+      message: "Duplicate value",
+      errors: {
+        [err.errors[0].path]: err.errors[0].message,
+      },
+    });
+  }
+
+  // Default error
+  return res.status(500).json({
+    success: false,
+    message: "Internal Server Error",
+    errors: null,
+  });
 };

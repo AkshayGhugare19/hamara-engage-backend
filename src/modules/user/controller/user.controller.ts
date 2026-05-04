@@ -8,75 +8,24 @@ import {
   updateUserService,
   addUserService,
 } from "../service/user.service";
-import { successResponse } from "../../../utils/responseHandler";
+
+import { errorResponse, successResponse } from "../../../utils/responseHandler";
+import { AppError } from "../../../utils/AppError";
 
 export const addUser = async (
   req: AuthRequest,
   res: Response,
   next: NextFunction
-): Promise<void> => {
+) => {
   try {
-    const { first_name, last_name, email, username, mobile, role, status, password } = req.body;
-    const data = await addUserService(first_name, last_name, email, username, mobile, role, status, password);
-    successResponse(res, 201, "User added successfully", data);
+    const { first_name, last_name, email,username, mobile,role,status,password } = req.body;
+    const data = await addUserService( first_name, last_name, email, username, mobile, role,status,password );
+    return successResponse(res, 201, "User added successfully", data);
   } catch (error) {
-    next(error);
-  }
-}
-
-export const getUsers = async (
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    const data = await getUsersService();
-    successResponse(res, 200, "Users fetched successfully", data);
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const me = async (
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    const data = await getMeService(req.user!.id);
-    successResponse(res, 200, "Profile fetched successfully", data);
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const paginateUsers = async (
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    const page = Number(req.query.page || 1);
-    const limit = Number(req.query.limit || 10);
-
-    const data = await paginateUsersService(page, limit);
-    successResponse(res, 200, "Users fetched successfully", data);
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const deleteUser = async (
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    const { id } = req.params;
-    await deleteUserService(id);
-    successResponse(res, 200, "User deleted successfully", null);
-  } catch (error) {
-    next(error);
+    if (error instanceof AppError) {
+      return errorResponse(res, error.statusCode, error.message);
+    }
+    return errorResponse(res, 500, "Failed to add user");
   }
 };
 
@@ -84,12 +33,60 @@ export const updateUser = async (
   req: AuthRequest,
   res: Response,
   next: NextFunction
-): Promise<void> => {
+) => {
   try {
-    const { id } = req.params;
-    const data = await updateUserService(id, req.body);
-    successResponse(res, 200, "User updated successfully", data);
+    const { first_name, last_name, mobile, status } = req.body;
+    const data = await updateUserService(req.params.id, { first_name, last_name, mobile,status });
+    return successResponse(res, 200, "User updated successfully", data);
   } catch (error) {
-    next(error);
+    if (error instanceof AppError) {
+      return errorResponse(res, error.statusCode, error.message);
+    }
+    return errorResponse(res, 500, "Failed to update user");
+  }
+};
+
+export const getUsers = async (req: AuthRequest, res: Response) => {
+  try {
+    const data = await getUsersService();
+    return successResponse(res, 200, "Users fetched successfully", data);
+  } catch {
+    return errorResponse(res, 500, "Failed to fetch users");
+  }
+};
+
+export const me = async (req: AuthRequest, res: Response) => {
+  try {
+    const data = await getMeService(req.user!.id);
+    return successResponse(res, 200, "Profile fetched", data);
+  } catch (error) {
+    if (error instanceof AppError) {
+      return errorResponse(res, error.statusCode, error.message);
+    }
+    return errorResponse(res, 500, "Failed to fetch profile");
+  }
+};
+
+export const paginateUsers = async (req: AuthRequest, res: Response) => {
+  try {
+    const page = Number(req.query.page || 1);
+    const limit = Number(req.query.limit || 10);
+
+    const data = await paginateUsersService(page, limit);
+    return successResponse(res, 200, "Users fetched", data);
+  } catch {
+    return errorResponse(res, 500, "Failed to fetch users");
+  }
+};
+
+export const deleteUser = async (req: AuthRequest, res: Response) => {
+  try {
+    await deleteUserService(req.params.id);
+    return successResponse(res, 200, "User deleted");
+  } catch (error) {
+    if (error instanceof AppError) {
+      return errorResponse(res, error.statusCode, error.message);
+    }
+    return errorResponse(res, 500, "Failed to delete user");
   }
 };

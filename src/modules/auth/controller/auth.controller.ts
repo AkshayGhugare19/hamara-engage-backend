@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { registerService, loginService, resetPasswordService } from "../service/auth.service";
-import { successResponse } from "../../../utils/responseHandler";
+import { errorResponse, successResponse } from "../../../utils/responseHandler";
+import { AppError } from "../../../utils/AppError";
 
 export const register = async (
   req: Request,
@@ -14,7 +15,11 @@ export const register = async (
 
     successResponse(res, 201, "User registered successfully", data);
   } catch (error) {
-    next(error);
+    if (error instanceof AppError) {
+      errorResponse(res, error.statusCode, error.message);
+    } else {
+      errorResponse(res, 500, "Failed to register user");
+    }
   }
 };
 
@@ -30,7 +35,11 @@ export const login = async (
 
     successResponse(res, 200, "Login successful", data);
   } catch (error) {
-    next(error);
+    if (error instanceof AppError) {
+      errorResponse(res, error.statusCode, error.message);
+    } else {
+      errorResponse(res, 500, "Failed to login");
+    }
   }
 };
 
@@ -41,10 +50,14 @@ export const resetPassword = async (
 ): Promise<void> => {
   try {
     const { email, token, new_password } = req.body;
-    const data = await resetPasswordService(email, token,new_password);
+    const data = await resetPasswordService(email, token, new_password);
     // Implement reset password logic here
     successResponse(res, 200, "Password reset successful", { email });
   } catch (error) {
-    next(error);
+    if (error instanceof AppError) {
+      errorResponse(res, error.statusCode, error.message);
+    } else {
+      errorResponse(res, 500, "Failed to reset password");
+    }
   }
 };

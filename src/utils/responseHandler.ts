@@ -10,6 +10,7 @@ export const successResponse = (
     success: true,
     message,
     data,
+    timestamp: new Date().toISOString(), // ✅ optional
   });
 };
 
@@ -23,5 +24,6 @@ export const errorResponse = (
     success: false,
     message,
     errors,
+    timestamp: new Date().toISOString(), // ✅ optional
   });
 };

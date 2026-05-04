@@ -1,34 +1,29 @@
 import { Request, Response, NextFunction } from "express";
-import Joi from "joi";
+import { ObjectSchema } from "joi";
 
-type ValidationTarget = "body" | "query" | "params";
-
-/**
- * Reusable Joi validation middleware factory.
- *
- * Usage:
- *   router.post("/register", validate(registerSchema), register);
- *   router.get("/paginate", validate(paginateSchema, "query"), paginateUsers);
- */
 export const validate =
-  (schema: Joi.ObjectSchema, target: ValidationTarget = "body") =>
+  (schema: ObjectSchema, property: "body" | "query" | "params" = "body") =>
   (req: Request, res: Response, next: NextFunction): void => {
-    const { error, value } = schema.validate(req[target], {
-      abortEarly: false,   // return ALL errors at once
-      stripUnknown: true,  // remove unknown fields
+    const { error, value } = schema.validate(req[property], {
+      abortEarly: false, // important: get all errors
     });
 
     if (error) {
-      const errors = error.details.map((d) => d.message);
+      const formattedErrors: Record<string, string> = {};
+
+      error.details.forEach((err) => {
+        const key = err.path[0] as string;
+        formattedErrors[key] = err.message;
+      });
+
       res.status(422).json({
         success: false,
         message: "Validation failed",
-        errors,
+        errors: formattedErrors,
       });
       return;
     }
 
-    // Replace req[target] with the validated + sanitized value
-    req[target] = value;
+    req[property] = value;
     next();
   };
