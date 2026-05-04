@@ -80,7 +80,7 @@ export const deleteUserService = async (id: string) => {
 
 export const updateUserService = async (
   id: string,
-  data: { first_name?: string; last_name?: string; mobile?: string; status?: "ACTIVE" | "INACTIVE" }
+  data: { first_name?: string; last_name?: string; email?: string; username?: string; mobile?: string; status?: "ACTIVE" | "INACTIVE" }
 ) => {
   // Uses BaseRepository.updateByPk — ORM method
   const updated = await UserRepository.updateByPk(id, data);

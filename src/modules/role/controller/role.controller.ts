@@ -9,6 +9,7 @@ import {
 } from "../service/role.service";
 import { errorResponse, successResponse } from "../../../utils/responseHandler";
 import { AppError } from "../../../utils/AppError";
+import { UniqueConstraintError } from "sequelize";
 
 export const addRole = async (
   req: AuthRequest,
@@ -18,14 +19,19 @@ export const addRole = async (
   try {
     const { name, description } = req.body;
     const data = await addRoleService(name, description);
-     successResponse(res, 200, "Role created successfully", data);
-      } catch (error) {
-        if (error instanceof AppError) {
-          errorResponse(res, error.statusCode, error.message);
-        } else {
-          errorResponse(res, 500, "Failed to create role");
-        }
-      }
+    console.log("Role created:", data);
+    successResponse(res, 200, "Role created successfully", data);
+  } catch (error) {
+    if (error instanceof UniqueConstraintError) {
+      return errorResponse(res, 400, "Role already exists");
+    }
+
+    if (error instanceof AppError) {
+      return errorResponse(res, error.statusCode, error.message);
+    }
+
+    return errorResponse(res, 500, "Failed to create role");
+  }
 };
 
 export const getRoles = async (
@@ -35,7 +41,7 @@ export const getRoles = async (
 ) => {
   try {
     const data = await getRolesService();
-     successResponse(res, 200, "Roles fetched successfully", data);
+    successResponse(res, 200, "Roles fetched successfully", data);
   } catch (error) {
     if (error instanceof AppError) {
       errorResponse(res, error.statusCode, error.message);
@@ -93,10 +99,14 @@ export const updateRole = async (
     const data = await updateRoleService(id, req.body);
     successResponse(res, 200, "Role updated successfully", data);
   } catch (error) {
-    if (error instanceof AppError) {
-      errorResponse(res, error.statusCode, error.message);
-    } else {
-      errorResponse(res, 500, "Failed to update role");
+    if (error instanceof UniqueConstraintError) {
+      return errorResponse(res, 400, "Role already exists");
     }
+
+    if (error instanceof AppError) {
+      return errorResponse(res, error.statusCode, error.message);
+    }
+
+    return errorResponse(res, 500, "Failed to update role");
   }
 };
