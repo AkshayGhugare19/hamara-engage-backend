@@ -7,6 +7,7 @@ import swaggerUi from "swagger-ui-express";
 
 import authRoutes from "./route/auth.routes";
 import userRoutes from "./route/user.routes";
+import roleRoutes from "./route/role.routes";
 import { errorHandler } from "./middlewares/error.middleware";
 import { swaggerSpec } from "./config/swagger";
 
@@ -32,6 +33,7 @@ app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 // ─── Routes ────────────────────────────────────────────────────────
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/roles", roleRoutes);
 
 // ─── 404 ───────────────────────────────────────────────────────────
 app.use((_req, res) => {
