@@ -7,7 +7,8 @@ import {
   deleteRoleService,
   updateRoleService,
 } from "../service/role.service";
-import { successResponse } from "../../../utils/responseHandler";
+import { errorResponse, successResponse } from "../../../utils/responseHandler";
+import { AppError } from "../../../utils/AppError";
 
 export const addRole = async (
   req: AuthRequest,
@@ -17,10 +18,14 @@ export const addRole = async (
   try {
     const { name, description } = req.body;
     const data = await addRoleService(name, description);
-    successResponse(res, 201, "Role created successfully", data);
-  } catch (error) {
-    next(error);
-  }
+     successResponse(res, 200, "Role created successfully", data);
+      } catch (error) {
+        if (error instanceof AppError) {
+          errorResponse(res, error.statusCode, error.message);
+        } else {
+          errorResponse(res, 500, "Failed to create role");
+        }
+      }
 };
 
 export const getRoles = async (
@@ -30,9 +35,13 @@ export const getRoles = async (
 ) => {
   try {
     const data = await getRolesService();
-    successResponse(res, 200, "Roles fetched successfully", data);
+     successResponse(res, 200, "Roles fetched successfully", data);
   } catch (error) {
-    next(error);
+    if (error instanceof AppError) {
+      errorResponse(res, error.statusCode, error.message);
+    } else {
+      errorResponse(res, 500, "Failed to fetch roles");
+    }
   }
 };
 
@@ -48,7 +57,11 @@ export const paginateRoles = async (
     const data = await paginateRolesService(page, limit);
     successResponse(res, 200, "Roles fetched successfully", data);
   } catch (error) {
-    next(error);
+    if (error instanceof AppError) {
+      errorResponse(res, error.statusCode, error.message);
+    } else {
+      errorResponse(res, 500, "Failed to fetch roles");
+    }
   }
 };
 
@@ -62,7 +75,11 @@ export const deleteRole = async (
     await deleteRoleService(id);
     successResponse(res, 200, "Role deleted successfully", null);
   } catch (error) {
-    next(error);
+    if (error instanceof AppError) {
+      errorResponse(res, error.statusCode, error.message);
+    } else {
+      errorResponse(res, 500, "Failed to delete role");
+    }
   }
 };
 
@@ -76,6 +93,10 @@ export const updateRole = async (
     const data = await updateRoleService(id, req.body);
     successResponse(res, 200, "Role updated successfully", data);
   } catch (error) {
-    next(error);
+    if (error instanceof AppError) {
+      errorResponse(res, error.statusCode, error.message);
+    } else {
+      errorResponse(res, 500, "Failed to update role");
+    }
   }
 };

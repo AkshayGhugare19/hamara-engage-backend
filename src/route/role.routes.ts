@@ -10,6 +10,7 @@ import { auth } from "../middlewares/auth.middleware";
 import { role } from "../middlewares/role.middleware";
 import { validate } from "../middlewares/validate.middleware";
 import { uuidParamSchema, paginateSchema } from "../validations/user.validation";
+import { addRoleSchema, roleIdParamSchema, updateRoleSchema } from "../validations/role.validation";
 
 const router = Router();
 
@@ -48,7 +49,7 @@ const router = Router();
  *       409:
  *         description: Role already exists
  */
-router.post("/add", auth, role("ADMIN"), addRole);
+router.post("/add", auth, role("ADMIN"), validate(addRoleSchema), addRole);
 
 /**
  * @swagger
@@ -127,7 +128,8 @@ router.post(
   "/update-by/:id",
   auth,
   role("ADMIN"),
-  validate(uuidParamSchema, "params"),
+  validate(roleIdParamSchema, "params"),  
+  validate(updateRoleSchema, "body"),      
   updateRole
 );
 
@@ -156,7 +158,7 @@ router.delete(
   "/:id",
   auth,
   role("ADMIN"),
-  validate(uuidParamSchema, "params"),
+  validate(roleIdParamSchema, "params"),
   deleteRole
 );
 
