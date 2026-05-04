@@ -36,20 +36,21 @@ export const addUserService = async (
     role,
     status,
   });
-    if (user) {
-      await sendMail({
-        to: email,
-        subject: "Welcome to Our App",
-        template: "welcome", 
-        data: { 
-          first_name, 
-          email, 
-          password: passwordHash,
-          login_link: "http://localhost:5173/login", 
-          reset_password_link: `http://localhost:5173/reset-password?email=${email}` 
-        }, 
-      });
-    }
+  // temporayy commenting out email sending to avoid issues during testing
+    // if (user) {
+    //   await sendMail({
+    //     to: email,
+    //     subject: "Welcome to Our App",
+    //     template: "welcome", 
+    //     data: { 
+    //       first_name, 
+    //       email, 
+    //       password: passwordHash,
+    //       login_link: "http://localhost:5173/login", 
+    //       reset_password_link: `http://localhost:5173/reset-password?email=${email}` 
+    //     }, 
+    //   });
+    // }
   return user;
 }
 
