@@ -7,6 +7,7 @@ import "../modules/sport-catalog/model/sport.model";
 import "../modules/sport-catalog/model/sport-team.model";
 import "../modules/sport-catalog/model/sport-tournament.model";
 import "../modules/sport-catalog/model/sport-market.model";
+import "../modules/gamification/shared/gamification.model";
 
 const syncDb = async () => {
   try {
