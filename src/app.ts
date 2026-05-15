@@ -11,6 +11,8 @@ import roleRoutes from "./route/role.routes";
 import systemSettingsRoutes from "./route/system-settings.routes";
 import gamificationTagRoutes from "./route/gamification-tag.routes";
 import mediaDatabaseRoutes from "./route/media-database.routes";
+import casinoCatalogRoutes from "./route/casino-catalog.routes";
+import sportCatalogRoutes from "./route/sport-catalog.routes";
 import { UPLOAD_DIR } from "./middlewares/upload.middleware";
 import { errorHandler } from "./middlewares/error.middleware";
 import { swaggerSpec } from "./config/swagger";
@@ -48,6 +50,8 @@ app.use("/api/roles", roleRoutes);
 app.use("/api/system-settings", systemSettingsRoutes);
 app.use("/api/tags-gamification", gamificationTagRoutes);
 app.use("/api/media-database", mediaDatabaseRoutes);
+app.use("/api/casino-catalog", casinoCatalogRoutes);
+app.use("/api/sport-catalog", sportCatalogRoutes);
 
 // ─── 404 ───────────────────────────────────────────────────────────
 app.use((_req, res) => {
