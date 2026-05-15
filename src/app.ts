@@ -9,6 +9,7 @@ import userRoutes from "./route/user.routes";
 import userLogRoutes from "./route/user-log.routes";
 import roleRoutes from "./route/role.routes";
 import systemSettingsRoutes from "./route/system-settings.routes";
+import gamificationTagRoutes from "./route/gamification-tag.routes";
 import { errorHandler } from "./middlewares/error.middleware";
 import { swaggerSpec } from "./config/swagger";
 import { initAssociations } from "./config/associations";
@@ -40,6 +41,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/user-log", userLogRoutes);
 app.use("/api/roles", roleRoutes);
 app.use("/api/system-settings", systemSettingsRoutes);
+app.use("/api/tags-gamification", gamificationTagRoutes);
 
 // ─── 404 ───────────────────────────────────────────────────────────
 app.use((_req, res) => {
