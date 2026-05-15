@@ -10,6 +10,8 @@ import userLogRoutes from "./route/user-log.routes";
 import roleRoutes from "./route/role.routes";
 import systemSettingsRoutes from "./route/system-settings.routes";
 import gamificationTagRoutes from "./route/gamification-tag.routes";
+import mediaDatabaseRoutes from "./route/media-database.routes";
+import { UPLOAD_DIR } from "./middlewares/upload.middleware";
 import { errorHandler } from "./middlewares/error.middleware";
 import { swaggerSpec } from "./config/swagger";
 import { initAssociations } from "./config/associations";
@@ -32,6 +34,9 @@ app.get("/api/health", (_req, res) => {
   res.json({ success: true, message: "Server is running" });
 });
 
+// ─── Static Uploads ────────────────────────────────────────────────
+app.use("/uploads", express.static(UPLOAD_DIR));
+
 // ─── Swagger Docs ──────────────────────────────────────────────────
 app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
@@ -42,6 +47,7 @@ app.use("/api/user-log", userLogRoutes);
 app.use("/api/roles", roleRoutes);
 app.use("/api/system-settings", systemSettingsRoutes);
 app.use("/api/tags-gamification", gamificationTagRoutes);
+app.use("/api/media-database", mediaDatabaseRoutes);
 
 // ─── 404 ───────────────────────────────────────────────────────────
 app.use((_req, res) => {
