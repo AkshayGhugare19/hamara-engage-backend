@@ -3,6 +3,7 @@ import CampaignRepository, {
 } from "../model/campaign.repository";
 import { Campaign, CampaignStatus } from "../model/campaign.model";
 import { AppError } from "../../../utils/AppError";
+import { generateCampaignLaunchEvents } from "../../analytics/service/analytics.service";
 
 export interface CampaignInput {
   name: string;
@@ -22,10 +23,23 @@ export const createCampaignService = async (
   input: CampaignInput,
   createdBy?: string
 ) => {
-  return CampaignRepository.create({
+  const campaign = await CampaignRepository.create({
     ...input,
     created_by: createdBy ?? null,
   } as Partial<Campaign["_creationAttributes"]>);
+
+  // Log the launch into Analytics (History + per-channel metrics).
+  // Never let an analytics failure block campaign creation.
+  try {
+    await generateCampaignLaunchEvents({
+      id: campaign.id,
+      name: campaign.name,
+    });
+  } catch (err) {
+    console.error("Failed to log campaign launch analytics:", err);
+  }
+
+  return campaign;
 };
 
 export const paginateCampaignsService = async (
