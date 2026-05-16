@@ -1,3 +1,4 @@
+import { Op } from "sequelize";
 import UserRepository from "../model/user.repository";
 import bcrypt from "bcryptjs";
 
@@ -89,4 +90,84 @@ export const updateUserService = async (
     throw new AppError("User not found", 404);
   }
   return updated;
+};
+
+interface UpdateMeData {
+  email?: string;
+  username?: string;
+  timezone?: string;
+  theme?: string;
+  two_factor_enabled?: boolean;
+}
+
+/**
+ * Update the logged-in user's own profile. Only the provided fields are
+ * touched. Email / username uniqueness is enforced against *other* users.
+ */
+export const updateMeService = async (id: string, data: UpdateMeData) => {
+  const user = await UserRepository.findByPk(id);
+  if (!user) {
+    throw new AppError("User not found", 404);
+  }
+
+  if (data.email && data.email !== user.email) {
+    const clash = await UserRepository.findOne({
+      email: data.email,
+      id: { [Op.ne]: id },
+    });
+    if (clash) {
+      throw new AppError("Email already in use", 409);
+    }
+  }
+
+  if (data.username && data.username !== user.username) {
+    const clash = await UserRepository.findOne({
+      username: data.username,
+      id: { [Op.ne]: id },
+    });
+    if (clash) {
+      throw new AppError("Username already in use", 409);
+    }
+  }
+
+  const payload: UpdateMeData = {};
+  if (data.email !== undefined) payload.email = data.email;
+  if (data.username !== undefined) payload.username = data.username;
+  if (data.timezone !== undefined) payload.timezone = data.timezone;
+  if (data.theme !== undefined) payload.theme = data.theme;
+  if (data.two_factor_enabled !== undefined)
+    payload.two_factor_enabled = data.two_factor_enabled;
+
+  return UserRepository.updateByPk(id, payload as never);
+};
+
+/**
+ * Change the logged-in user's password after verifying the current one.
+ */
+export const changePasswordService = async (
+  id: string,
+  current_password: string,
+  new_password: string
+) => {
+  const user = await UserRepository.findByPkWithPassword(id);
+  if (!user) {
+    throw new AppError("User not found", 404);
+  }
+
+  const match = await bcrypt.compare(current_password, user.password);
+  if (!match) {
+    throw new AppError("Current password is incorrect", 400);
+  }
+
+  const same = await bcrypt.compare(new_password, user.password);
+  if (same) {
+    throw new AppError(
+      "New password must be different from the current password",
+      400
+    );
+  }
+
+  const hash = await bcrypt.hash(new_password, 12);
+  await user.update({ password: hash });
+  return { id };
 };

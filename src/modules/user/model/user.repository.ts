@@ -21,6 +21,10 @@ class UserRepository extends BaseRepository<User> {
     });
   }
 
+  async findByPkWithPassword(id: string): Promise<User | null> {
+    return (User as any).scope("withPassword").findByPk(id);
+  }
+
   async findAllUsers(): Promise<User[]> {
     return this.findWhere({ role: "USER" } as WhereOptions);
   }

@@ -7,6 +7,8 @@ import {
   deleteUserService,
   updateUserService,
   addUserService,
+  updateMeService,
+  changePasswordService,
 } from "../service/user.service";
 
 import { errorResponse, successResponse } from "../../../utils/responseHandler";
@@ -86,6 +88,46 @@ export const me = async (req: AuthRequest, res: Response) => {
       return errorResponse(res, error.statusCode, error.message);
     }
     return errorResponse(res, 500, "Failed to fetch profile");
+  }
+};
+
+export const updateMe = async (req: AuthRequest, res: Response) => {
+  try {
+    const { email, username, timezone, theme, two_factor_enabled } = req.body;
+    const data = await updateMeService(req.user!.id, {
+      email,
+      username,
+      timezone,
+      theme,
+      two_factor_enabled,
+    });
+    return successResponse(res, 200, "Profile updated successfully", data);
+  } catch (error) {
+    if (error instanceof UniqueConstraintError) {
+      const messages = error.errors.map((err: any) => {
+        if (err.path === "email") return "Email already in use";
+        if (err.path === "username") return "Username already in use";
+        return `${err.path} already exists`;
+      });
+      return errorResponse(res, 409, messages.join(", "));
+    }
+    if (error instanceof AppError) {
+      return errorResponse(res, error.statusCode, error.message);
+    }
+    return errorResponse(res, 500, "Failed to update profile");
+  }
+};
+
+export const changePassword = async (req: AuthRequest, res: Response) => {
+  try {
+    const { current_password, new_password } = req.body;
+    await changePasswordService(req.user!.id, current_password, new_password);
+    return successResponse(res, 200, "Password changed successfully");
+  } catch (error) {
+    if (error instanceof AppError) {
+      return errorResponse(res, error.statusCode, error.message);
+    }
+    return errorResponse(res, 500, "Failed to change password");
   }
 };
 

@@ -6,11 +6,19 @@ import {
   deleteUser,
   updateUser,
   addUser,
+  updateMe,
+  changePassword,
 } from "../modules/user/controller/user.controller";
 import { auth } from "../middlewares/auth.middleware";
 import { role } from "../middlewares/role.middleware";
 import { validate } from "../middlewares/validate.middleware";
-import { addOrUpdateUserSchema, paginateSchema, uuidParamSchema } from "../validations/user.validation";
+import {
+  addOrUpdateUserSchema,
+  paginateSchema,
+  uuidParamSchema,
+  updateMeSchema,
+  changePasswordSchema,
+} from "../validations/user.validation";
 
 const router = Router();
 
@@ -117,6 +125,63 @@ router.post(
  *         description: Unauthorized
  */
 router.get("/me", auth, me);
+
+/**
+ * @swagger
+ * /api/users/me:
+ *   patch:
+ *     summary: Update logged-in user's own profile (email, username, timezone, theme, 2FA)
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           example:
+ *             email: newemail@example.com
+ *             username: johnny
+ *             timezone: GMT+05:30 India Standard Time
+ *             theme: light
+ *             two_factor_enabled: true
+ *     responses:
+ *       200:
+ *         description: Profile updated
+ *       409:
+ *         description: Email or username already in use
+ *       422:
+ *         description: Validation failed
+ */
+router.patch("/me", auth, validate(updateMeSchema), updateMe);
+
+/**
+ * @swagger
+ * /api/users/me/change-password:
+ *   post:
+ *     summary: Change logged-in user's password
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           example:
+ *             current_password: oldPass123
+ *             new_password: newPass123
+ *     responses:
+ *       200:
+ *         description: Password changed
+ *       400:
+ *         description: Current password incorrect
+ *       422:
+ *         description: Validation failed
+ */
+router.post(
+  "/me/change-password",
+  auth,
+  validate(changePasswordSchema),
+  changePassword
+);
 
 /**
  * @swagger

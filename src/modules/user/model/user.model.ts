@@ -23,6 +23,9 @@ export class User extends Model<
   declare access_token: CreationOptional<string | null>;
   declare refresh_token: CreationOptional<string | null>;
   declare status: CreationOptional<"ACTIVE" | "INACTIVE">;
+  declare timezone: CreationOptional<string>;
+  declare two_factor_enabled: CreationOptional<boolean>;
+  declare theme: CreationOptional<string>;
   declare readonly created_at: CreationOptional<Date>;
   declare readonly updated_at: CreationOptional<Date>;
 }
@@ -77,6 +80,21 @@ User.init(
     refresh_token: {
       type: DataTypes.TEXT,
       allowNull: true,
+    },
+    timezone: {
+      type: DataTypes.STRING(100),
+      allowNull: false,
+      defaultValue: "GMT+04 Samara / Armenia",
+    },
+    two_factor_enabled: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
+    theme: {
+      type: DataTypes.STRING(20),
+      allowNull: false,
+      defaultValue: "dark",
     },
     created_at: DataTypes.DATE,
     updated_at: DataTypes.DATE,
