@@ -78,7 +78,17 @@ export const updateMeSchema = Joi.object({
     "string.max": "Timezone cannot exceed 100 characters",
   }),
   theme: Joi.string()
-    .valid("dark", "light", "white", "thin", "midnight")
+    .valid(
+      "dark",
+      "light",
+      "white",
+      "thin",
+      "midnight",
+      "slate",
+      "ocean",
+      "forest",
+      "contrast"
+    )
     .messages({
       "any.only": "Invalid theme selected",
     }),
