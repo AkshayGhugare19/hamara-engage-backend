@@ -17,6 +17,7 @@ import gamificationRoutes from "./route/gamification.routes";
 import campaignRoutes from "./route/campaign.routes";
 import segmentRoutes from "./route/segment.routes";
 import templateRoutes from "./route/template.routes";
+import customTriggerRoutes from "./route/custom-trigger.routes";
 import analyticsRoutes from "./route/analytics.routes";
 import { UPLOAD_DIR } from "./middlewares/upload.middleware";
 import { errorHandler } from "./middlewares/error.middleware";
@@ -61,6 +62,7 @@ app.use("/api/gamification", gamificationRoutes);
 app.use("/api/campaigns", campaignRoutes);
 app.use("/api/segments", segmentRoutes);
 app.use("/api/templates", templateRoutes);
+app.use("/api/custom-triggers", customTriggerRoutes);
 app.use("/api/analytics", analyticsRoutes);
 
 // ─── 404 ───────────────────────────────────────────────────────────
