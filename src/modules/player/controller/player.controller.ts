@@ -10,6 +10,8 @@ import {
   getRewardsService,
   addManualRewardService,
   getLogsService,
+  getPlayerByEmailService,
+  addPlayerXpByEmailService,
 } from "../service/player.service";
 import { errorResponse, successResponse } from "../../../utils/responseHandler";
 import { AppError } from "../../../utils/AppError";
@@ -54,6 +56,40 @@ export const getPlayer = async (
     successResponse(res, 200, "Player fetched successfully", data);
   } catch (error) {
     handle(res, error, "Failed to fetch player");
+  }
+};
+
+export const getPlayerByEmail = async (
+  req: AuthRequest,
+  res: Response,
+  _next: NextFunction
+) => {
+  try {
+    const { email } = req.body;
+
+    const data = await getPlayerByEmailService(email);
+
+    successResponse(res, 200, "Player fetched successfully", data);
+  } catch (error) {
+    handle(res, error, "Failed to fetch player");
+  }
+};
+
+export const addPlayerXpByEmail = async (
+  req: AuthRequest,
+  res: Response,
+  _next: NextFunction
+) => {
+  try {
+    const { email, amount } = req.body;
+    const data = await addPlayerXpByEmailService(
+      email,
+      amount,
+      req.user?.email ?? null
+    );
+    successResponse(res, 200, "Player XP updated successfully", data);
+  } catch (error) {
+    handle(res, error, "Failed to update player XP");
   }
 };
 

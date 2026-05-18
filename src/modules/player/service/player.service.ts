@@ -9,6 +9,13 @@ import { Player } from "../model/player.model";
 import playerDataRepository from "../../player-data/model/player-data.repository";
 import { PlayerDataType } from "../../player-data/model/player-data.model";
 import { AppError } from "../../../utils/AppError";
+import {
+  loadLadder,
+  firstRung,
+  resolveProgress,
+} from "../../integration/service/gam.engine";
+import { applyXpToPlayer } from "../../integration/service/integration.service";
+import { gamificationModels } from "../../gamification/shared/gamification.model";
 
 type Json = Record<string, unknown>;
 
@@ -98,6 +105,128 @@ export const getPlayerService = async (id: string) => {
   };
 };
 
+/** ACTIVE, non-archived rows of one gamification feature, priority first. */
+const fetchFeature = (key: keyof typeof gamificationModels) =>
+  gamificationModels[key].findAll({
+    where: { status: "ACTIVE", archived: false } as never,
+    order: [
+      ["priority", "DESC"],
+      ["created_at", "DESC"],
+    ],
+  });
+
+/**
+ * Full player snapshot for the gamify frontend: the player profile plus
+ * everything that drives the gamification UI — the live rank ladder
+ * (ranks + their levels), the player's resolved progression against it,
+ * the catalog of missions / mission bundles / reward-shop items, and the
+ * player's own earned rewards and recent activity logs.
+ */
+export const getPlayerByEmailService = async (email: string) => {
+  const player = await playerRepository.findOne({ email });
+  if (!player) {
+    throw new AppError("Player not found", 404);
+  }
+
+  const defs = await fetchCustomDefs();
+
+  const [ranks, missions, missionBundles, rewardShop, ladder] =
+    await Promise.all([
+      fetchFeature("ranks"),
+      fetchFeature("missions"),
+      fetchFeature("mission-bundles"),
+      fetchFeature("reward-shop"),
+      loadLadder(),
+    ]);
+
+  const [rewards, logs] = await Promise.all([
+    playerRewardRepository.findWhere(
+      { player_id: player.id },
+      { order: [["created_at", "DESC"]] }
+    ),
+    playerLogRepository.findWhere(
+      { player_id: player.id },
+      { order: [["created_at", "DESC"]], limit: 50 }
+    ),
+  ]);
+
+  const progress =
+    resolveProgress(Number(player.xp_points ?? 0), ladder) ?? {
+      level: Number(player.level ?? 1),
+      rank_name: player.rank_name ?? null,
+      xp_points: Number(player.xp_points ?? 0),
+      xp_to_next: Number(player.xp_to_next ?? 0),
+      max_level: Number(player.max_level ?? 0),
+    };
+
+  return {
+    ...player.toJSON(),
+    custom_data: applyCustomData(player.custom_data as Json | null, defs),
+    gamification: {
+      progress,
+      levels: ladder,
+      ranks,
+      missions,
+      mission_bundles: missionBundles,
+      reward_shop: rewardShop,
+      rewards,
+      logs,
+    },
+  };
+};
+
+/**
+ * Admin/integration helper: give a player (resolved by email) an XP delta.
+ * Reuses the single gamification engine so level, rank, xp_to_next and any
+ * crossed per-level rewards update exactly like the gamify sync path.
+ */
+export const addPlayerXpByEmailService = async (
+  email: string,
+  amount: number,
+  actor?: string | null
+) => {
+  const player = await playerRepository.findOne({ email });
+  if (!player) {
+    throw new AppError("Player not found", 404);
+  }
+
+  const delta = Number(amount);
+  if (!Number.isFinite(delta) || delta === 0) {
+    throw new AppError("amount must be a non-zero number", 400);
+  }
+
+  const { player: updated, nextXp, progress } = await applyXpToPlayer(
+    player,
+    delta
+  );
+
+  await playerLogRepository.create({
+    player_id: player.id,
+    action: "XP Adjusted",
+    detail: `${delta > 0 ? "+" : ""}${delta} XP (total ${nextXp})${
+      progress ? ` • Lvl ${progress.level} ${progress.rank_name}` : ""
+    }`,
+    actor: actor ?? "admin",
+  });
+
+  return {
+    id: updated.id,
+    player_id: updated.player_id,
+    email: updated.email,
+    xp_points: Number(updated.xp_points ?? 0),
+    level: Number(updated.level ?? 1),
+    rank_name: updated.rank_name ?? null,
+    xp_to_next: Number(updated.xp_to_next ?? 0),
+    max_level: Number(updated.max_level ?? 0),
+    leveled_up: progress
+      ? Number(player.level ?? 1) !== progress.level
+      : false,
+    rank_changed: progress
+      ? (player.rank_name ?? null) !== progress.rank_name
+      : false,
+  };
+};
+
 /**
  * Keep the `player_data` JSON bucket in sync with the player's core
  * columns so the "Player Data" tab always shows a populated record.
@@ -154,13 +283,50 @@ const withBuckets = (
   };
 };
 
+/**
+ * Allocate a brand-new player onto the configured rank ladder: the first
+ * rank and its entry-level XP. Falls back to the model defaults when no
+ * ranks are configured or the caller already supplied progression values.
+ */
+const applyInitialGamification = async (
+  input: PlayerInput
+): Promise<PlayerInput> => {
+  if (
+    input.level !== undefined ||
+    input.rank_name !== undefined ||
+    input.xp_points !== undefined
+  ) {
+    return input;
+  }
+  try {
+    const ladder = await loadLadder();
+    const start = firstRung(ladder);
+    if (!start) return input;
+    const xp = start.xp_start;
+    const progress = resolveProgress(xp, ladder);
+    if (!progress) return input;
+    return {
+      ...input,
+      xp_points: progress.xp_points,
+      level: progress.level,
+      rank_name: progress.rank_name,
+      xp_to_next: progress.xp_to_next,
+      max_level: progress.max_level,
+    };
+  } catch (err) {
+    console.error("Failed to allocate initial rank for player:", err);
+    return input;
+  }
+};
+
 export const createPlayerService = async (input: PlayerInput) => {
   const existing = await playerRepository.findOne({
     player_id: input.player_id,
   });
   if (existing) throw new AppError("player_id already exists", 409);
+  const seeded = await applyInitialGamification(input);
   return playerRepository.create(
-    withBuckets(input) as Partial<Player["_creationAttributes"]>
+    withBuckets(seeded) as Partial<Player["_creationAttributes"]>
   );
 };
 

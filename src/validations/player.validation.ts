@@ -53,6 +53,19 @@ export const playerIdParamSchema = Joi.object({
   }),
 });
 
+export const addXpByEmailSchema = Joi.object({
+  email: Joi.string().email().required().messages({
+    "string.empty": "email is required",
+    "string.email": "email must be a valid email",
+    "any.required": "email is required",
+  }),
+  amount: Joi.number().invalid(0).required().messages({
+    "number.base": "amount must be a number",
+    "any.invalid": "amount must be a non-zero number",
+    "any.required": "amount is required",
+  }),
+});
+
 export const manualRewardSchema = Joi.object({
   reward_type: Joi.string().min(1).max(120).required().messages({
     "string.empty": "Reward Type is required",

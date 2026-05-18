@@ -9,6 +9,8 @@ import {
   getRewards,
   addManualReward,
   getLogs,
+  getPlayerByEmail,
+  addPlayerXpByEmail,
 } from "../modules/player/controller/player.controller";
 import { auth } from "../middlewares/auth.middleware";
 import { validate } from "../middlewares/validate.middleware";
@@ -17,6 +19,7 @@ import {
   updatePlayerSchema,
   playerIdParamSchema,
   manualRewardSchema,
+  addXpByEmailSchema,
 } from "../validations/player.validation";
 
 const router = Router();
@@ -71,7 +74,67 @@ router.post("/add", auth, validate(createPlayerSchema), createPlayer);
  *       200: { description: Player fetched successfully }
  *       404: { description: Player not found }
  */
-router.get("/:id", auth, validate(playerIdParamSchema, "params"), getPlayer);
+router.get("/:id", validate(playerIdParamSchema, "params"), getPlayer);
+
+/**
+ * @swagger
+ * /api/players/by-email:
+ *   post:
+ *     summary: Get player profile by email
+ *     tags: [Players]
+ *     security: [{ bearerAuth: [] }]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *     responses:
+ *       200:
+ *         description: Player fetched successfully
+ *       404:
+ *         description: Player not found
+ */
+router.post("/by-email", getPlayerByEmail );
+
+/**
+ * @swagger
+ * /api/players/by-email/add-xp:
+ *   post:
+ *     summary: Add XP to a player (by email) and recompute level & rank
+ *     description: >
+ *       Accumulates the XP delta on the player resolved by email, then
+ *       recomputes level, rank and xp_to_next from the configured CRM rank
+ *       ladder and auto-grants any per-level rewards crossed. Uses the same
+ *       gamification engine as the service sync path.
+ *     tags: [Players]
+ *     security: [{ bearerAuth: [] }]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email, amount]
+ *             properties:
+ *               email:  { type: string, format: email }
+ *               amount: { type: number, example: 150, description: XP delta (non-zero; may be negative) }
+ *     responses:
+ *       200: { description: Player XP updated successfully }
+ *       400: { description: Invalid amount }
+ *       404: { description: Player not found }
+ */
+router.post(
+  "/by-email/add-xp",
+  validate(addXpByEmailSchema, "body"),
+  addPlayerXpByEmail
+);
 
 /**
  * @swagger

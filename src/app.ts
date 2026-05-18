@@ -23,6 +23,7 @@ import unsubscribeReportRoutes from "./route/unsubscribe-report.routes";
 import playerDataRoutes from "./route/player-data.routes";
 import playerRoutes from "./route/player.routes";
 import analyticsRoutes from "./route/analytics.routes";
+import integrationRoutes from "./route/integration.routes";
 import { UPLOAD_DIR } from "./middlewares/upload.middleware";
 import { errorHandler } from "./middlewares/error.middleware";
 import { swaggerSpec } from "./config/swagger";
@@ -72,6 +73,7 @@ app.use("/api/unsubscribe-reports", unsubscribeReportRoutes);
 app.use("/api/player-data", playerDataRoutes);
 app.use("/api/players", playerRoutes);
 app.use("/api/analytics", analyticsRoutes);
+app.use("/api/integration", integrationRoutes);
 
 // ─── 404 ───────────────────────────────────────────────────────────
 app.use((_req, res) => {
