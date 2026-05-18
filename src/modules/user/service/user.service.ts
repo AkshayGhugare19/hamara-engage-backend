@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 
 import { AppError } from "../../../utils/AppError";
 import { sendMail } from "../../../utils/mailService";
+import { createPlayerService } from "../../player/service/player.service";
 export const addUserService = async (
   first_name: string,
   last_name: string,
@@ -37,6 +38,20 @@ export const addUserService = async (
     role,
     status,
   });
+
+  try {
+    await createPlayerService({
+      player_id: username || email,
+      username: username || email,
+      name: `${first_name ?? ""} ${last_name ?? ""}`.trim() || username,
+      email,
+      mobile_number: mobile,
+      status: status === "INACTIVE" ? "INACTIVE" : "ACTIVE",
+      registration_date: new Date(),
+    });
+  } catch (err) {
+    console.error("Failed to create player for new user:", err);
+  }
   // temporayy commenting out email sending to avoid issues during testing
     // if (user) {
     //   await sendMail({

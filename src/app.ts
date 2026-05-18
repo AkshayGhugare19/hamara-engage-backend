@@ -21,6 +21,7 @@ import customTriggerRoutes from "./route/custom-trigger.routes";
 import frequencyCapRoutes from "./route/frequency-cap.routes";
 import unsubscribeReportRoutes from "./route/unsubscribe-report.routes";
 import playerDataRoutes from "./route/player-data.routes";
+import playerRoutes from "./route/player.routes";
 import analyticsRoutes from "./route/analytics.routes";
 import { UPLOAD_DIR } from "./middlewares/upload.middleware";
 import { errorHandler } from "./middlewares/error.middleware";
@@ -69,6 +70,7 @@ app.use("/api/custom-triggers", customTriggerRoutes);
 app.use("/api/frequency-caps", frequencyCapRoutes);
 app.use("/api/unsubscribe-reports", unsubscribeReportRoutes);
 app.use("/api/player-data", playerDataRoutes);
+app.use("/api/players", playerRoutes);
 app.use("/api/analytics", analyticsRoutes);
 
 // ─── 404 ───────────────────────────────────────────────────────────
