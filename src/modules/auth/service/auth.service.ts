@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import UserRepository from "../../user/model/user.repository";
 import { AppError } from "../../../utils/AppError";
 import { generateAccessToken } from "../../../utils/generateAccessToken";
+import { decryptPassword } from "../../../utils/passwordCrypto";
 
 export const registerService = async (
   first_name: string,
@@ -58,7 +59,8 @@ export const loginService = async (
   }
 
   const userJson = user?.toJSON() as Record<string, unknown>;
-  const match = await bcrypt.compare(password, userJson.password as string);
+  const realPassword = decryptPassword(password);
+  const match = await bcrypt.compare(realPassword, userJson.password as string);
 
   if (!match) {
     throw new AppError("Invalid email or password", 401);
