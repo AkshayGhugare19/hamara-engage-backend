@@ -13,6 +13,7 @@ import {
   loadLadder,
   firstRung,
   resolveProgress,
+  resolveNextRank,
 } from "../../integration/service/gam.engine";
 import { applyXpToPlayer } from "../../integration/service/integration.service";
 import { gamificationModels } from "../../gamification/shared/gamification.model";
@@ -98,10 +99,25 @@ export const paginatePlayersService = async (
 export const getPlayerService = async (id: string) => {
   const player = await playerRepository.findByPk(id);
   if (!player) throw new AppError("Player not found", 404);
-  const defs = await fetchCustomDefs();
+  const [defs, ladder] = await Promise.all([fetchCustomDefs(), loadLadder()]);
+
+  const xp = Number(player.xp_points ?? 0);
+  const progress = resolveProgress(xp, ladder) ?? {
+    level: Number(player.level ?? 1),
+    rank_name: player.rank_name ?? null,
+    xp_points: xp,
+    xp_to_next: Number(player.xp_to_next ?? 0),
+    max_level: Number(player.max_level ?? 0),
+  };
+  const next_rank = resolveNextRank(xp, ladder);
+
   return {
     ...player.toJSON(),
     custom_data: applyCustomData(player.custom_data as Json | null, defs),
+    gamification: {
+      progress,
+      next_rank,
+    },
   };
 };
 
@@ -150,20 +166,23 @@ export const getPlayerByEmailService = async (email: string) => {
     ),
   ]);
 
+  const xpTotal = Number(player.xp_points ?? 0);
   const progress =
-    resolveProgress(Number(player.xp_points ?? 0), ladder) ?? {
+    resolveProgress(xpTotal, ladder) ?? {
       level: Number(player.level ?? 1),
       rank_name: player.rank_name ?? null,
-      xp_points: Number(player.xp_points ?? 0),
+      xp_points: xpTotal,
       xp_to_next: Number(player.xp_to_next ?? 0),
       max_level: Number(player.max_level ?? 0),
     };
+  const next_rank = resolveNextRank(xpTotal, ladder);
 
   return {
     ...player.toJSON(),
     custom_data: applyCustomData(player.custom_data as Json | null, defs),
     gamification: {
       progress,
+      next_rank,
       levels: ladder,
       ranks,
       missions,

@@ -6,6 +6,7 @@ import { errorResponse, successResponse } from "../../../utils/responseHandler";
 import { AppError } from "../../../utils/AppError";
 import { GamificationEntity } from "./gamification.model";
 import { GamificationService } from "./gamification.service";
+import { assertValidRankPayload } from "./rank.guard";
 import {
   paginateGamificationSchema,
   upsertGamificationSchema,
@@ -30,9 +31,15 @@ const fail = (res: Response, error: unknown, fallback: string) => {
  *   POST   /archive-by/:id
  *   DELETE /:id
  */
+interface GamificationRouterOptions {
+  /** Enforce the single-ladder rank rules (continuity + uniqueness). */
+  validateRankContinuity?: boolean;
+}
+
 export const buildGamificationRouter = (
   model: typeof GamificationEntity,
-  label: string
+  label: string,
+  options: GamificationRouterOptions = {}
 ): Router => {
   const router = Router();
   const service = new GamificationService(model, label);
@@ -79,6 +86,9 @@ export const buildGamificationRouter = (
     validate(upsertGamificationSchema, "body"),
     async (req: AuthRequest, res: Response, _next: NextFunction) => {
       try {
+        if (options.validateRankContinuity) {
+          await assertValidRankPayload(req.body);
+        }
         const record = await service.create({
           ...req.body,
           created_by: req.user?.email ?? null,
@@ -97,6 +107,9 @@ export const buildGamificationRouter = (
     validate(upsertGamificationSchema, "body"),
     async (req: AuthRequest, res: Response, _next: NextFunction) => {
       try {
+        if (options.validateRankContinuity) {
+          await assertValidRankPayload(req.body, req.params.id);
+        }
         const record = await service.update(req.params.id, req.body);
         successResponse(res, 200, `${label} updated successfully`, record);
       } catch (error) {

@@ -31,7 +31,12 @@ const LABELS: Record<GamificationFeatureKey, string> = {
  */
 (Object.keys(GAMIFICATION_FEATURES) as GamificationFeatureKey[]).forEach(
   (key) => {
-    router.use(`/${key}`, buildGamificationRouter(gamificationModels[key], LABELS[key]));
+    router.use(
+      `/${key}`,
+      buildGamificationRouter(gamificationModels[key], LABELS[key], {
+        validateRankContinuity: key === "ranks",
+      })
+    );
   }
 );
 

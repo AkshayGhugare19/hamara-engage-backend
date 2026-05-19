@@ -29,6 +29,21 @@ export interface Progress {
   max_level: number;
 }
 
+/**
+ * The next *rank* a player is climbing towards (not just the next level).
+ * Surfaces what the upcoming rank gives so the profile can show "what's
+ * next": its entry level, the XP needed to reach it, how much XP is still
+ * remaining, and the level reward configured on that entry level.
+ */
+export interface NextRank {
+  rank_name: string;
+  level: number;
+  xp_required: number;
+  xp_remaining: number;
+  reward_type: string | null;
+  reward_value: number | null;
+}
+
 const num = (v: unknown, fallback = 0): number => {
   const n = Number(v);
   return Number.isFinite(n) ? n : fallback;
@@ -105,6 +120,41 @@ export const resolveProgress = (
     xp_points: xp,
     xp_to_next: next ? Math.max(0, next.xp_start - xp) : 0,
     max_level: maxLevel,
+  };
+};
+
+/**
+ * Resolve the next rank a player is working towards. Walks forward from
+ * the player's current rung to the first rung that belongs to a *different*
+ * rank — that rung is the entry level of the next rank. Returns `null` when
+ * the player is already on the top rank (or no ladder is configured).
+ */
+export const resolveNextRank = (
+  xpTotal: number,
+  ladder: LevelRung[]
+): NextRank | null => {
+  if (!ladder.length) return null;
+
+  const xp = Math.max(0, num(xpTotal));
+
+  let idx = 0;
+  for (let i = 0; i < ladder.length; i += 1) {
+    if (xp >= ladder[i].xp_start) idx = i;
+    else break;
+  }
+  const current = ladder[idx];
+  const entry = ladder
+    .slice(idx + 1)
+    .find((r) => r.rank_name !== current.rank_name);
+  if (!entry) return null;
+
+  return {
+    rank_name: entry.rank_name,
+    level: entry.level,
+    xp_required: entry.xp_start,
+    xp_remaining: Math.max(0, entry.xp_start - xp),
+    reward_type: entry.reward_type ?? null,
+    reward_value: entry.reward_value ?? null,
   };
 };
 
