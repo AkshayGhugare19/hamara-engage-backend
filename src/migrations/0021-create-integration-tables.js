@@ -4,7 +4,7 @@
  * Cross-backend gamification integration tables.
  *
  *  - external_accounts   : links a gamify-engage user (origin/external_id)
- *                          to a hamara Player so synced XP events land on
+ *                          to a gamru Player so synced XP events land on
  *                          the right profile.
  *  - gam_xp_transactions : append-only idempotency ledger. Every inbound
  *                          sync event is recorded once (UNIQUE event_id),

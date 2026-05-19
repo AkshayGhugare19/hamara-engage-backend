@@ -8,7 +8,7 @@ import {
 import sequelize from "../../../config/db";
 
 /**
- * Links an external (gamify-engage) user to a hamara Player. The pair
+ * Links an external (gamify-engage) user to a gamru Player. The pair
  * (origin, external_id) is unique; `player_id` is filled once the matching
  * Player is resolved (by email on first sync, usually USER_REGISTERED).
  */

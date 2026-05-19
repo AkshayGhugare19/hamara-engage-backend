@@ -10,7 +10,7 @@ const router = Router();
  * @swagger
  * tags:
  *   name: Integration
- *   description: Service-to-service gamification sync (gamify-engage → hamara)
+ *   description: Service-to-service gamification sync (gamify-engage → gamru)
  */
 
 /**
@@ -20,7 +20,7 @@ const router = Router();
  *     summary: Apply a gamification sync event to the linked player
  *     description: >
  *       Service-authenticated (x-service-key). Idempotent on event_id.
- *       USER_REGISTERED links the gamify user to a hamara player;
+ *       USER_REGISTERED links the gamify user to a gamru player;
  *       XP_AWARDED accumulates XP and recomputes level/rank from the
  *       configured rank ladder.
  *     tags: [Integration]

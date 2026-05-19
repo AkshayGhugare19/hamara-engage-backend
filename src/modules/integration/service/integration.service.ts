@@ -45,7 +45,7 @@ export interface ApplyResult {
 }
 
 /**
- * Resolve (and lazily link) the hamara Player behind a gamify user.
+ * Resolve (and lazily link) the gamru Player behind a gamify user.
  * Linking happens by email — the gamify USER_REGISTERED push carries the
  * email and arrives right after the mirror user/player is created here.
  */
@@ -169,7 +169,7 @@ const summarize = (p: Player): ApplyResult["player"] => ({
 
 /**
  * Apply one inbound sync event. Idempotent on `event_id` via the
- * gam_xp_transactions UNIQUE ledger. Hamara owns progression: XP is
+ * gam_xp_transactions UNIQUE ledger. Gamru owns progression: XP is
  * accumulated locally and the level/rank is recomputed from the CRM
  * rank ladder, so LEVEL_UP / RANK_UP pushes are audit-only.
  */

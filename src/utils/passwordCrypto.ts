@@ -12,7 +12,7 @@ import crypto from "crypto";
  */
 
 const SECRET: string =
-  process.env.PASSWORD_SECRET || "hamara-engage-shared-password-secret";
+  process.env.PASSWORD_SECRET || "gamru-engage-shared-password-secret";
 
 const ENC_PREFIX = "enc:v1:";
 

@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 
 /**
- * Guards service-to-service endpoints (gamify-engage → hamara). Both
+ * Guards service-to-service endpoints (gamify-engage → gamru). Both
  * backends share `SERVICE_SHARED_KEY`; callers send it as `x-service-key`.
  */
 export const serviceAuth = (
