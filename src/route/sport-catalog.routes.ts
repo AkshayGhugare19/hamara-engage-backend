@@ -31,35 +31,7 @@ import {
 
 const router = Router();
 
-/**
- * @swagger
- * tags:
- *   name: SportCatalog
- *   description: Sport catalog (sports, teams, tournaments, markets) APIs
- */
-
 // ─── Sports ────────────────────────────────────────────────────────
-
-/**
- * @swagger
- * /api/sport-catalog/sports/paginate:
- *   get:
- *     summary: Get paginated sports (search)
- *     tags: [SportCatalog]
- *     security: [{ bearerAuth: [] }]
- *     parameters:
- *       - in: query
- *         name: page
- *         schema: { type: integer, example: 1 }
- *       - in: query
- *         name: limit
- *         schema: { type: integer, example: 10 }
- *       - in: query
- *         name: search
- *         schema: { type: string }
- *     responses:
- *       200: { description: Paginated sports }
- */
 router.get(
   "/sports/paginate",
   auth,
@@ -90,17 +62,6 @@ router.delete(
 );
 
 // ─── Teams ─────────────────────────────────────────────────────────
-
-/**
- * @swagger
- * /api/sport-catalog/teams/paginate:
- *   get:
- *     summary: Get paginated teams (search + sport/tournament filters)
- *     tags: [SportCatalog]
- *     security: [{ bearerAuth: [] }]
- *     responses:
- *       200: { description: Paginated teams }
- */
 router.get(
   "/teams/paginate",
   auth,
@@ -131,7 +92,6 @@ router.delete(
 );
 
 // ─── Tournaments ───────────────────────────────────────────────────
-
 router.get(
   "/tournaments/paginate",
   auth,
@@ -162,7 +122,6 @@ router.delete(
 );
 
 // ─── Markets ───────────────────────────────────────────────────────
-
 router.get(
   "/markets/paginate",
   auth,

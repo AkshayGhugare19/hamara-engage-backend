@@ -23,15 +23,14 @@ const LABELS: Record<GamificationFeatureKey, string> = {
   tournaments: "Tournament",
 };
 
-/**
- * @swagger
- * tags:
- *   name: Gamification
- *   description: Gamification feature APIs (missions, ranks, rules, …)
- */
 (Object.keys(GAMIFICATION_FEATURES) as GamificationFeatureKey[]).forEach(
   (key) => {
-    router.use(`/${key}`, buildGamificationRouter(gamificationModels[key], LABELS[key]));
+    router.use(
+      `/${key}`,
+      buildGamificationRouter(gamificationModels[key], LABELS[key], {
+        validateRankContinuity: key === "ranks",
+      })
+    );
   }
 );
 

@@ -14,80 +14,10 @@ import { addRoleSchema, roleIdParamSchema, updateRoleSchema } from "../validatio
 
 const router = Router();
 
-/**
- * @swagger
- * tags:
- *   name: Roles
- *   description: Role management APIs
- */
-
-/**
- * @swagger
- * /api/roles/add:
- *   post:
- *     summary: Create a new role (Admin only)
- *     tags: [Roles]
- *     security:
- *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required: [name]
- *             properties:
- *               name:
- *                 type: string
- *                 example: MANAGER
- *               description:
- *                 type: string
- *                 example: Manager role with limited access
- *     responses:
- *       201:
- *         description: Role created successfully
- *       409:
- *         description: Role already exists
- */
 router.post("/add", auth, role("ADMIN"), validate(addRoleSchema), addRole);
 
-/**
- * @swagger
- * /api/roles:
- *   get:
- *     summary: Get all roles (Admin only)
- *     tags: [Roles]
- *     security:
- *       - bearerAuth: []
- *     responses:
- *       200:
- *         description: List of roles
- */
 router.get("/", auth, role("ADMIN"), getRoles);
 
-/**
- * @swagger
- * /api/roles/paginate:
- *   get:
- *     summary: Get paginated roles (Admin only)
- *     tags: [Roles]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: page
- *         schema:
- *           type: integer
- *           example: 1
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *           example: 10
- *     responses:
- *       200:
- *         description: Paginated roles list
- */
 router.get(
   "/paginate",
   auth,
@@ -96,64 +26,15 @@ router.get(
   paginateRoles
 );
 
-/**
- * @swagger
- * /api/roles/update-by/{id}:
- *   post:
- *     summary: Update role by ID (Admin only)
- *     tags: [Roles]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *           format: uuid
- *     requestBody:
- *       content:
- *         application/json:
- *           example:
- *             name: MANAGER
- *             description: Updated role description
- *             status: ACTIVE
- *     responses:
- *       200:
- *         description: Role updated successfully
- *       404:
- *         description: Role not found
- */
 router.post(
   "/update-by/:id",
   auth,
   role("ADMIN"),
-  validate(roleIdParamSchema, "params"),  
-  validate(updateRoleSchema, "body"),      
+  validate(roleIdParamSchema, "params"),
+  validate(updateRoleSchema, "body"),
   updateRole
 );
 
-/**
- * @swagger
- * /api/roles/{id}:
- *   delete:
- *     summary: Delete role by ID (Admin only)
- *     tags: [Roles]
- *     security:
- *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *           format: uuid
- *     responses:
- *       200:
- *         description: Role deleted successfully
- *       404:
- *         description: Role not found
- */
 router.delete(
   "/:id",
   auth,
