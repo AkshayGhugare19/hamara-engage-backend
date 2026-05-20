@@ -27,41 +27,7 @@ import {
 
 const router = Router();
 
-/**
- * @swagger
- * tags:
- *   name: CasinoCatalog
- *   description: Casino catalog (games, categories, providers) APIs
- */
-
 // ─── Games ─────────────────────────────────────────────────────────
-
-/**
- * @swagger
- * /api/casino-catalog/games/paginate:
- *   get:
- *     summary: Get paginated casino games (search + provider/category filters)
- *     tags: [CasinoCatalog]
- *     security: [{ bearerAuth: [] }]
- *     parameters:
- *       - in: query
- *         name: page
- *         schema: { type: integer, example: 1 }
- *       - in: query
- *         name: limit
- *         schema: { type: integer, example: 10 }
- *       - in: query
- *         name: search
- *         schema: { type: string }
- *       - in: query
- *         name: provider
- *         schema: { type: string }
- *       - in: query
- *         name: category
- *         schema: { type: string }
- *     responses:
- *       200: { description: Paginated casino games }
- */
 router.get(
   "/games/paginate",
   auth,
@@ -69,16 +35,6 @@ router.get(
   paginateCasinoGames
 );
 
-/**
- * @swagger
- * /api/casino-catalog/games/add:
- *   post:
- *     summary: Create a new casino game
- *     tags: [CasinoCatalog]
- *     security: [{ bearerAuth: [] }]
- *     responses:
- *       201: { description: Casino game created successfully }
- */
 router.post(
   "/games/add",
   auth,
@@ -86,22 +42,6 @@ router.post(
   addCasinoGame
 );
 
-/**
- * @swagger
- * /api/casino-catalog/games/update-by/{id}:
- *   post:
- *     summary: Update casino game by ID
- *     tags: [CasinoCatalog]
- *     security: [{ bearerAuth: [] }]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema: { type: string }
- *     responses:
- *       200: { description: Casino game updated successfully }
- *       404: { description: Casino game not found }
- */
 router.post(
   "/games/update-by/:id",
   auth,
@@ -110,22 +50,6 @@ router.post(
   updateCasinoGame
 );
 
-/**
- * @swagger
- * /api/casino-catalog/games/{id}:
- *   delete:
- *     summary: Delete casino game by ID
- *     tags: [CasinoCatalog]
- *     security: [{ bearerAuth: [] }]
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema: { type: string }
- *     responses:
- *       200: { description: Casino game deleted successfully }
- *       404: { description: Casino game not found }
- */
 router.delete(
   "/games/:id",
   auth,
@@ -134,7 +58,6 @@ router.delete(
 );
 
 // ─── Categories ────────────────────────────────────────────────────
-
 router.get(
   "/categories/paginate",
   auth,
@@ -165,7 +88,6 @@ router.delete(
 );
 
 // ─── Providers ─────────────────────────────────────────────────────
-
 router.get(
   "/providers/paginate",
   auth,

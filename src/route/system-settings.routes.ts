@@ -73,35 +73,9 @@ import {
 
 const router = Router();
 
-/**
- * @swagger
- * tags:
- *   name: SystemSettings
- *   description: System settings APIs (key/value config + collections)
- */
-
 // ─── KEY/VALUE SETTINGS ────────────────────────────────────────────────────────
-
-/**
- * @swagger
- * /api/system-settings/settings:
- *   get:
- *     summary: Get all settings grouped by panel
- *     tags: [SystemSettings]
- *     security: [{ bearerAuth: [] }]
- *     responses:
- *       200: { description: Settings grouped by panel }
- */
 router.get("/settings", auth, getAllSettings);
 
-/**
- * @swagger
- * /api/system-settings/settings/bulk:
- *   put:
- *     summary: Bulk upsert settings (Admin only)
- *     tags: [SystemSettings]
- *     security: [{ bearerAuth: [] }]
- */
 router.put(
   "/settings/bulk",
   auth,
@@ -110,21 +84,6 @@ router.put(
   bulkUpsertSettings
 );
 
-/**
- * @swagger
- * /api/system-settings/settings/{panel}:
- *   get:
- *     summary: Get settings for one panel
- *     tags: [SystemSettings]
- *     security: [{ bearerAuth: [] }]
- *     parameters:
- *       - in: path
- *         name: panel
- *         required: true
- *         schema:
- *           type: string
- *           enum: [core, gamification, mission, crm, platform, widgets]
- */
 router.get(
   "/settings/:panel",
   auth,
@@ -132,22 +91,6 @@ router.get(
   getSettingsByPanel
 );
 
-/**
- * @swagger
- * /api/system-settings/settings/{panel}/{key}:
- *   get:
- *     summary: Get a single setting
- *     tags: [SystemSettings]
- *     security: [{ bearerAuth: [] }]
- *   put:
- *     summary: Upsert a single setting (Admin only)
- *     tags: [SystemSettings]
- *     security: [{ bearerAuth: [] }]
- *   delete:
- *     summary: Delete a setting (Admin only)
- *     tags: [SystemSettings]
- *     security: [{ bearerAuth: [] }]
- */
 router.get(
   "/settings/:panel/:key",
   auth,
@@ -171,12 +114,6 @@ router.delete(
 );
 
 // ─── ACCOUNT STATUSES ─────────────────────────────────────────────────────────
-/**
- * @swagger
- * /api/system-settings/account-statuses:
- *   get: { tags: [SystemSettings], security: [{ bearerAuth: [] }], summary: List account statuses }
- *   post: { tags: [SystemSettings], security: [{ bearerAuth: [] }], summary: Create an account status (Admin) }
- */
 router.get("/account-statuses", auth, listAccountStatuses);
 router.put(
   "/account-statuses/bulk",
